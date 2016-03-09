@@ -40,8 +40,10 @@ module Requirejs
 
         # NOTE: Using sprockets >= 3.x the rails_manifest_path is not a directory
         #       but a file. That's why we get the `dirname` if the given
-        #       `rails_manifest_path` is a file.
-        rails_manifest_path = File.dirname(rails_manifest_path) if File.file?(rails_manifest_path)
+        #       `rails_manifest_path` is a not a directory.
+        unless File.directory?(rails_manifest_path.to_s)
+          rails_manifest_path = File.dirname(rails_manifest_path)
+        end
 
         manifest_path = File.join(rails_manifest_path, 'rjs_manifest.yml')
         config.requirejs.manifest_path = Pathname.new(manifest_path)
@@ -61,7 +63,7 @@ module Requirejs
           config = app.config
 
           # NOTE: Not DRY -> extract
-          rails_manifest_path = config.assets.manifest ||= File.join(::Rails.public_path, config.assets.prefix)
+          rails_manifest_path = config.assets.manifest || File.join(::Rails.public_path, config.assets.prefix)
 
           rails_manifest = ::Sprockets::Manifest.new(app.assets, rails_manifest_path)
           if config.requirejs.manifest_path.exist? && rails_manifest
